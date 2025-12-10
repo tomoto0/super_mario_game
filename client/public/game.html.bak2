@@ -329,14 +329,6 @@
     </div>
 
     <div id="overlay">
-    <!-- エンディング動画プレイヤー -->
-    <div id="video-container" class="hidden" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 25; display: flex; align-items: center; justify-content: center;">
-        <video id="ending-video" style="width: 100%; height: 100%; object-fit: contain;" playsinline>
-            <source src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663028639017/jabPwBLrZXGMcuxz.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    </div>
-
         <h1 id="title-text">SUPER MARIO<br>ADVENTURE</h1>
         <p class="subtitle">The Ultimate Platformer Experience</p>
         <p id="desc-text">
@@ -2376,28 +2368,16 @@ class Game {
     victory() {
         this.isRunning = false;
         sound.stopMusic();
-        
-        // エンディング動画を再生
-        const videoContainer = document.getElementById('video-container');
-        const endingVideo = document.getElementById('ending-video');
-        
-        videoContainer.classList.remove('hidden');
-        endingVideo.play();
-        
-        // 動画終了後にCongratulations画面を表示
-        endingVideo.onended = () => {
-            videoContainer.classList.add('hidden');
-            sound.victory();
-            titleText.innerHTML = 'CONGRATULATIONS!';
-            descText.innerHTML = `You saved the Princess!<br>Score: ${this.score}<br>Coins: ${this.coins}`;
-            startBtn.innerText = '★ PLAY AGAIN ★';
-            overlay.classList.remove('hidden');
-            bossHealthContainer.classList.remove('visible');
-            this.lives = 3;
-            this.score = 0;
-            this.coins = 0;
-            this.level = 0;
-        };
+        sound.victory();
+        titleText.innerHTML = 'CONGRATULATIONS!';
+        descText.innerHTML = `You saved the Princess!<br>Score: ${this.score}<br>Coins: ${this.coins}`;
+        startBtn.innerText = '★ PLAY AGAIN ★';
+        overlay.classList.remove('hidden');
+        bossHealthContainer.classList.remove('visible');
+        this.lives = 3;
+        this.score = 0;
+        this.coins = 0;
+        this.level = 0;
     }
 
     update() {
