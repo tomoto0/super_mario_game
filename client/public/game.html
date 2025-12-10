@@ -329,13 +329,6 @@
     </div>
 
     <div id="overlay">
-    <!-- エンディング動画プレイヤー -->
-    <div id="video-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 30; display: none; align-items: center; justify-content: center;">
-        <video id="ending-video" style="width: 100%; height: 100%; object-fit: contain;" playsinline preload="auto">
-            <source src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663028639017/jabPwBLrZXGMcuxz.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    </div>
 
         <h1 id="title-text">SUPER MARIO<br>ADVENTURE</h1>
         <p class="subtitle">The Ultimate Platformer Experience</p>
@@ -2377,6 +2370,10 @@ class Game {
         this.isRunning = false;
         sound.stopMusic();
         
+        // ゲーム画面を非表示にする
+        const gameContainer = document.getElementById('game-container');
+        gameContainer.style.display = 'none';
+        
         // エンディング動画を再生
         const videoContainer = document.getElementById('video-container');
         const endingVideo = document.getElementById('ending-video');
@@ -2384,22 +2381,23 @@ class Game {
         // ビデオコンテナを表示
         videoContainer.style.display = 'flex';
         
+        // 動画を最初から再生
+        endingVideo.currentTime = 0;
+        
         // 動画の再生を試みる
         const playPromise = endingVideo.play();
         
         if (playPromise !== undefined) {
             playPromise.catch(error => {
                 console.log('Video play error:', error);
-                // 再生エラーの場合は、ユーザーインタラクション後に再試行
-                endingVideo.addEventListener('play', function() {
-                    console.log('Video started playing');
-                }, { once: true });
             });
         }
         
         // 動画終了後にCongratulations画面を表示
         endingVideo.onended = () => {
+            console.log('Video ended - showing congratulations');
             videoContainer.style.display = 'none';
+            gameContainer.style.display = 'block';
             sound.victory();
             titleText.innerHTML = 'CONGRATULATIONS!';
             descText.innerHTML = `You saved the Princess!<br>Score: ${this.score}<br>Coins: ${this.coins}`;
@@ -2412,11 +2410,12 @@ class Game {
             this.level = 0;
         };
         
-        // タイムアウト: 動画が再生されない場合は10秒後にCongratulations画面を表示
+        // タイムアウト: 動画が再生されない場合は30秒後にCongratulations画面を表示
         setTimeout(() => {
             if (!endingVideo.ended && videoContainer.style.display !== 'none') {
                 console.log('Video timeout - showing congratulations screen');
                 videoContainer.style.display = 'none';
+                gameContainer.style.display = 'block';
                 sound.victory();
                 titleText.innerHTML = 'CONGRATULATIONS!';
                 descText.innerHTML = `You saved the Princess!<br>Score: ${this.score}<br>Coins: ${this.coins}`;
@@ -2428,7 +2427,7 @@ class Game {
                 this.coins = 0;
                 this.level = 0;
             }
-        }, 10000);
+        }, 30000);
     }
 
     update() {
@@ -2887,5 +2886,13 @@ gameLoop();
 
 console.log('Super Mario Adventure - Fully Loaded!');
 </script>
+
+    <!-- エンディング動画プレイヤー -->
+    <div id="video-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 50; display: none; align-items: center; justify-content: center;">
+        <video id="ending-video" style="width: 100%; height: 100%; object-fit: contain;" playsinline preload="auto" crossorigin="anonymous">
+            <source src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663028639017/jabPwBLrZXGMcuxz.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
 </body>
 </html>
