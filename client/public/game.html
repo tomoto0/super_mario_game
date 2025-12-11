@@ -704,14 +704,13 @@ class Particle {
 // スプライト描画クラス
 // ========================================
 class SpriteRenderer {
-    // マリオを描画（さらに改善版：より豊かなディテール）
+    // マリオを描画（改善版：豊かなディテールとアニメーション）
     static drawMario(ctx, x, y, width, height, facing, frame, isPoweredUp, isInvincible, isCrouching, hasFirePower, starPower) {
         ctx.save();
         ctx.translate(x + width/2, y + height);
         if (facing < 0) ctx.scale(-1, 1);
         
         const h = isCrouching ? height * 0.6 : height;
-        const bodyTilt = Math.sin(frame * 0.15) * 0.05; // 体の傾き
         
         // スター状態：虹色に点滅
         if (starPower && isInvincible) {
@@ -724,12 +723,12 @@ class SpriteRenderer {
             }
         }
         
-        // 無敵時の点滅
+        // 無敵時の点滅（通常の無敵）
         if (isInvincible && !starPower && Math.floor(Date.now() / 100) % 2 === 0) {
             ctx.globalAlpha = 0.5;
         }
         
-        // 体の色
+        // 体の色を状態に応じて変更
         let hatColor = '#ff0000';
         let hatBandColor = '#cc0000';
         let shirtColor = '#ff0000';
@@ -754,37 +753,21 @@ class SpriteRenderer {
         }
         
         // 影の描画
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
         ctx.beginPath();
-        ctx.ellipse(0, 2, width * 0.48, 4, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 2, width * 0.45, 4, 0, 0, Math.PI * 2);
         ctx.fill();
         
         // ========== 帽子 ==========
-        ctx.save();
-        ctx.rotate(bodyTilt);
-        
         ctx.fillStyle = hatColor;
         ctx.beginPath();
         ctx.ellipse(0, -h + 6, width * 0.52, 10, 0, Math.PI, 0);
-        ctx.fill();
-        
-        // 帽子の立体感
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-        ctx.beginPath();
-        ctx.ellipse(0, -h + 4, width * 0.5, 8, 0, Math.PI, 0);
         ctx.fill();
         
         ctx.fillStyle = hatBandColor;
         ctx.beginPath();
         ctx.ellipse(0, -h + 14, width * 0.48, 4, 0, 0, Math.PI * 2);
         ctx.fill();
-        
-        // 帽子のマーク（M）
-        ctx.fillStyle = '#ffff00';
-        ctx.font = `bold ${width * 0.25}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('M', 0, -h + 8);
         
         ctx.fillStyle = hatColor;
         ctx.beginPath();
@@ -797,8 +780,7 @@ class SpriteRenderer {
         ctx.ellipse(0, -h + 22, width * 0.38, 14, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // 顔の陰影
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
         ctx.beginPath();
         ctx.ellipse(0, -h + 24, width * 0.35, 12, 0, 0, Math.PI * 2);
         ctx.fill();
@@ -806,74 +788,66 @@ class SpriteRenderer {
         // 左目
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.ellipse(-width * 0.12, -h + 20, 4.5, 5.5, 0, 0, Math.PI * 2);
+        ctx.ellipse(-width * 0.12, -h + 20, 4, 5, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // 瞳孔のアニメーション
         const pupilOffset = Math.sin(frame * 0.1) * 1.5;
-        const blinkFrame = Math.sin(frame * 0.05);
-        const blinkAmount = Math.max(0, Math.sin(frame * 0.08) * 2);
-        
         ctx.fillStyle = '#000';
         ctx.beginPath();
-        ctx.ellipse(-width * 0.12 + pupilOffset, -h + 20 - blinkAmount, 2.5, 2.5 - blinkAmount * 0.5, 0, 0, Math.PI * 2);
+        ctx.arc(-width * 0.12 + pupilOffset, -h + 20, 2.5, 0, Math.PI * 2);
         ctx.fill();
         
         // 右目
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.ellipse(width * 0.12, -h + 20, 4.5, 5.5, 0, 0, Math.PI * 2);
+        ctx.ellipse(width * 0.12, -h + 20, 4, 5, 0, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.fillStyle = '#000';
         ctx.beginPath();
-        ctx.ellipse(width * 0.12 + pupilOffset, -h + 20 - blinkAmount, 2.5, 2.5 - blinkAmount * 0.5, 0, 0, Math.PI * 2);
+        ctx.arc(width * 0.12 + pupilOffset, -h + 20, 2.5, 0, Math.PI * 2);
         ctx.fill();
         
-        // 眉毛（より表現力豊か）
+        // 眉毛
         ctx.strokeStyle = '#4a3728';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.5;
         ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.arc(-width * 0.12, -h + 15, 3.5, 0, Math.PI);
+        ctx.moveTo(-width * 0.18, -h + 16);
+        ctx.lineTo(-width * 0.06, -h + 15);
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(width * 0.12, -h + 15, 3.5, 0, Math.PI);
+        ctx.moveTo(width * 0.06, -h + 15);
+        ctx.lineTo(width * 0.18, -h + 16);
         ctx.stroke();
         
         // 鼻
         ctx.fillStyle = '#ffaa77';
         ctx.beginPath();
-        ctx.ellipse(0, -h + 24, 3.5, 4.5, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, -h + 24, 3, 4, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // 鼻の光沢
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-        ctx.beginPath();
-        ctx.ellipse(-1, -h + 22, 1.5, 1.5, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 口（より表現力豊か）
+        // 口
         ctx.strokeStyle = '#4a3728';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.5;
         ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.arc(0, -h + 28, 4.5, 0, Math.PI);
+        ctx.arc(0, -h + 28, 4, 0, Math.PI);
         ctx.stroke();
         
         // 髭（より詳細）
         ctx.strokeStyle = '#4a3728';
-        ctx.lineWidth = 1.3;
+        ctx.lineWidth = 1.2;
         ctx.lineCap = 'round';
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 4; i++) {
             ctx.beginPath();
-            ctx.moveTo(-width * 0.08, -h + 26 + i * 1.2);
-            ctx.quadraticCurveTo(-width * 0.16, -h + 24.5 + i * 1.2, -width * 0.24, -h + 26 + i * 1.2);
+            ctx.moveTo(-width * 0.08, -h + 26 + i * 1.5);
+            ctx.quadraticCurveTo(-width * 0.15, -h + 25 + i * 1.5, -width * 0.22, -h + 26 + i * 1.5);
             ctx.stroke();
             
             ctx.beginPath();
-            ctx.moveTo(width * 0.08, -h + 26 + i * 1.2);
-            ctx.quadraticCurveTo(width * 0.16, -h + 24.5 + i * 1.2, width * 0.24, -h + 26 + i * 1.2);
+            ctx.moveTo(width * 0.08, -h + 26 + i * 1.5);
+            ctx.quadraticCurveTo(width * 0.15, -h + 25 + i * 1.5, width * 0.22, -h + 26 + i * 1.5);
             ctx.stroke();
         }
         
@@ -898,37 +872,33 @@ class SpriteRenderer {
         ctx.ellipse(0, -h + 50, width * 0.35, 10, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // ボタン（より立体的）
+        // ボタン
         ctx.fillStyle = '#ffd700';
         ctx.beginPath();
-        ctx.arc(-width * 0.12, -h + 44, 3, 0, Math.PI * 2);
+        ctx.arc(-width * 0.12, -h + 44, 2.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(width * 0.12, -h + 44, 3, 0, Math.PI * 2);
+        ctx.arc(width * 0.12, -h + 44, 2.5, 0, Math.PI * 2);
         ctx.fill();
         
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
         ctx.beginPath();
-        ctx.arc(-width * 0.12 - 1.2, -h + 42, 1.2, 0, Math.PI * 2);
+        ctx.arc(-width * 0.12 - 1, -h + 42, 1, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(width * 0.12 - 1.2, -h + 42, 1.2, 0, Math.PI * 2);
+        ctx.arc(width * 0.12 - 1, -h + 42, 1, 0, Math.PI * 2);
         ctx.fill();
         
         // ========== 腕 ==========
-        const armSwing = Math.sin(frame * 0.3) * 0.5;
-        const armAngle = armSwing * Math.PI / 3;
+        const armSwing = Math.sin(frame * 0.3) * 0.4;
+        const armAngle = armSwing * Math.PI / 4;
         
         ctx.save();
         ctx.translate(-width * 0.32, -h + 38);
         ctx.rotate(-armAngle);
         ctx.fillStyle = gloveColor;
         ctx.beginPath();
-        ctx.ellipse(0, 0, 5, 9, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = skinColor;
-        ctx.beginPath();
-        ctx.ellipse(0, -6, 4, 4, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, 4, 8, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
         
@@ -937,50 +907,35 @@ class SpriteRenderer {
         ctx.rotate(armAngle);
         ctx.fillStyle = gloveColor;
         ctx.beginPath();
-        ctx.ellipse(0, 0, 5, 9, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = skinColor;
-        ctx.beginPath();
-        ctx.ellipse(0, -6, 4, 4, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, 4, 8, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
         
         // ========== 足 ==========
         const legSwing = Math.sin(frame * 0.3);
-        const leftLegOffset = legSwing * 5;
-        const rightLegOffset = -legSwing * 5;
+        const leftLegOffset = legSwing * 4;
+        const rightLegOffset = -legSwing * 4;
         
         ctx.fillStyle = shoeColor;
         ctx.beginPath();
-        ctx.ellipse(-width * 0.25 + leftLegOffset, -8, 6, 11, 0, 0, Math.PI * 2);
+        ctx.ellipse(-width * 0.25 + leftLegOffset, -8, 5, 10, 0, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.fillStyle = '#2a1810';
         ctx.beginPath();
-        ctx.ellipse(-width * 0.25 + leftLegOffset, 0, 7, 3.5, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-        ctx.beginPath();
-        ctx.ellipse(-width * 0.25 + leftLegOffset, 1, 6, 2, 0, 0, Math.PI * 2);
+        ctx.ellipse(-width * 0.25 + leftLegOffset, 0, 6, 3, 0, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.fillStyle = shoeColor;
         ctx.beginPath();
-        ctx.ellipse(width * 0.25 + rightLegOffset, -8, 6, 11, 0, 0, Math.PI * 2);
+        ctx.ellipse(width * 0.25 + rightLegOffset, -8, 5, 10, 0, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.fillStyle = '#2a1810';
         ctx.beginPath();
-        ctx.ellipse(width * 0.25 + rightLegOffset, 0, 7, 3.5, 0, 0, Math.PI * 2);
+        ctx.ellipse(width * 0.25 + rightLegOffset, 0, 6, 3, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-        ctx.beginPath();
-        ctx.ellipse(width * 0.25 + rightLegOffset, 1, 6, 2, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.restore();
         ctx.restore();
     }
 
@@ -1082,7 +1037,7 @@ class SpriteRenderer {
         ctx.restore();
     }
 
-    // クッパを描画（改善版：より迫力のあるデザイン）
+    // クッパを描画
     static drawBowser(ctx, x, y, width, height, frame, health, maxHealth) {
         ctx.save();
         ctx.translate(x + width/2, y + height);
@@ -1090,250 +1045,108 @@ class SpriteRenderer {
         const breathe = Math.sin(frame * 0.1) * 0.03;
         ctx.scale(1 + breathe, 1 - breathe);
         
-        const bodyTilt = Math.sin(frame * 0.12) * 0.08; // 体の傾き
-        
-        // 甲羅の色
-        const shellColor = '#2d5016';
-        const shellHighlight = '#3d6b1f';
-        const skinColor = '#4a7c3f';
-        const eyeColor = '#ffff00';
-        
-        // 影
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+        // 甲羅
+        ctx.fillStyle = '#228B22';
         ctx.beginPath();
-        ctx.ellipse(0, 2, width * 0.5, 5, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, -height * 0.4, width * 0.45, height * 0.35, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // ========== 甲羅（背景） ==========
-        ctx.save();
-        ctx.rotate(bodyTilt);
-        
-        ctx.fillStyle = shellColor;
-        ctx.beginPath();
-        ctx.ellipse(0, -height * 0.35, width * 0.5, height * 0.45, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 甲羅のパターン（より詳細）
-        ctx.strokeStyle = shellHighlight;
-        ctx.lineWidth = 2;
-        for (let i = 0; i < 4; i++) {
-            for (let j = 0; j < 3; j++) {
-                const px = (i - 1.5) * width * 0.15;
-                const py = -height * 0.35 + (j - 1) * height * 0.15;
-                ctx.beginPath();
-                ctx.arc(px, py, width * 0.08, 0, Math.PI * 2);
-                ctx.stroke();
-            }
+        // トゲ
+        ctx.fillStyle = '#F0E68C';
+        for (let i = 0; i < 5; i++) {
+            const angle = -Math.PI * 0.8 + (i / 4) * Math.PI * 0.6;
+            const sx = Math.cos(angle) * width * 0.4;
+            const sy = -height * 0.4 + Math.sin(angle) * height * 0.3;
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.lineTo(sx + Math.cos(angle) * 20, sy + Math.sin(angle) * 20 - 10);
+            ctx.lineTo(sx + 8, sy);
+            ctx.fill();
         }
         
-        // 甲羅の光沢
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        // 体
+        ctx.fillStyle = '#DAA520';
         ctx.beginPath();
-        ctx.ellipse(-width * 0.15, -height * 0.4, width * 0.2, height * 0.25, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // ========== 体 ==========
-        ctx.fillStyle = skinColor;
-        ctx.beginPath();
-        ctx.ellipse(0, -height * 0.05, width * 0.45, height * 0.35, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 体の陰影
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-        ctx.beginPath();
-        ctx.ellipse(0, -height * 0.02, width * 0.4, height * 0.3, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // ========== 首と頭 ==========
-        ctx.fillStyle = skinColor;
-        ctx.beginPath();
-        ctx.ellipse(0, -height * 0.25, width * 0.35, height * 0.2, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, -height * 0.35, width * 0.35, height * 0.25, 0, 0, Math.PI);
         ctx.fill();
         
         // 頭
-        ctx.fillStyle = skinColor;
+        ctx.fillStyle = '#90EE90';
         ctx.beginPath();
-        ctx.ellipse(0, -height * 0.45, width * 0.4, height * 0.25, 0, 0, Math.PI * 2);
+        ctx.ellipse(width * 0.15, -height * 0.7, width * 0.25, height * 0.2, 0.2, 0, Math.PI * 2);
         ctx.fill();
         
-        // 頭の陰影
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+        // 鼻
+        ctx.fillStyle = '#228B22';
         ctx.beginPath();
-        ctx.ellipse(0, -height * 0.43, width * 0.38, height * 0.23, 0, 0, Math.PI * 2);
+        ctx.ellipse(width * 0.35, -height * 0.68, 12, 8, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // ========== 目 ==========
-        // 左目
-        ctx.fillStyle = eyeColor;
+        // 角
+        ctx.fillStyle = '#F0E68C';
         ctx.beginPath();
-        ctx.ellipse(-width * 0.15, -height * 0.48, width * 0.1, height * 0.12, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 瞳孔（怒った表情）
-        ctx.fillStyle = '#000';
-        const pupilX = -width * 0.15 + Math.sin(frame * 0.08) * width * 0.02;
-        const pupilY = -height * 0.48 - height * 0.02;
-        ctx.beginPath();
-        ctx.ellipse(pupilX, pupilY, width * 0.04, height * 0.06, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 右目
-        ctx.fillStyle = eyeColor;
-        ctx.beginPath();
-        ctx.ellipse(width * 0.15, -height * 0.48, width * 0.1, height * 0.12, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = '#000';
-        const pupilX2 = width * 0.15 + Math.sin(frame * 0.08) * width * 0.02;
-        ctx.beginPath();
-        ctx.ellipse(pupilX2, pupilY, width * 0.04, height * 0.06, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // ========== 角 ==========
-        ctx.fillStyle = '#8b4513';
-        ctx.beginPath();
-        ctx.ellipse(-width * 0.22, -height * 0.55, width * 0.08, height * 0.15, -0.3, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = '#654321';
-        ctx.beginPath();
-        ctx.ellipse(-width * 0.22, -height * 0.55, width * 0.06, height * 0.13, -0.3, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = '#8b4513';
-        ctx.beginPath();
-        ctx.ellipse(width * 0.22, -height * 0.55, width * 0.08, height * 0.15, 0.3, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = '#654321';
-        ctx.beginPath();
-        ctx.ellipse(width * 0.22, -height * 0.55, width * 0.06, height * 0.13, 0.3, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // ========== 牙 ==========
-        ctx.fillStyle = '#fffacd';
-        ctx.beginPath();
-        ctx.ellipse(-width * 0.08, -height * 0.35, width * 0.05, height * 0.08, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = '#fffacd';
-        ctx.beginPath();
-        ctx.ellipse(width * 0.08, -height * 0.35, width * 0.05, height * 0.08, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 牙の陰影
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-        ctx.beginPath();
-        ctx.ellipse(-width * 0.08, -height * 0.33, width * 0.04, height * 0.06, 0, 0, Math.PI * 2);
+        ctx.moveTo(width * 0.05, -height * 0.85);
+        ctx.lineTo(width * 0.0, -height * 1.05);
+        ctx.lineTo(width * 0.15, -height * 0.85);
         ctx.fill();
         ctx.beginPath();
-        ctx.ellipse(width * 0.08, -height * 0.33, width * 0.04, height * 0.06, 0, 0, Math.PI * 2);
+        ctx.moveTo(width * 0.25, -height * 0.85);
+        ctx.lineTo(width * 0.3, -height * 1.05);
+        ctx.lineTo(width * 0.35, -height * 0.85);
         ctx.fill();
         
-        // ========== 口 ==========
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(0, -height * 0.35, width * 0.15, 0, Math.PI);
-        ctx.stroke();
-        
-        // ========== 腕 ==========
-        const armSwing = Math.sin(frame * 0.25) * 0.4;
-        const armAngle = armSwing * Math.PI / 2.5;
-        
-        // 左腕
+        // 眉毛
+        ctx.fillStyle = '#8B0000';
         ctx.save();
-        ctx.translate(-width * 0.35, -height * 0.1);
-        ctx.rotate(-armAngle);
-        ctx.fillStyle = skinColor;
+        ctx.translate(width * 0.05, -height * 0.78);
+        ctx.rotate(-0.4);
+        ctx.fillRect(-8, -3, 16, 5);
+        ctx.restore();
+        ctx.save();
+        ctx.translate(width * 0.28, -height * 0.78);
+        ctx.rotate(0.2);
+        ctx.fillRect(-8, -3, 16, 5);
+        ctx.restore();
+        
+        // 目
+        ctx.fillStyle = '#fff';
         ctx.beginPath();
-        ctx.ellipse(0, 0, width * 0.08, height * 0.2, 0, 0, Math.PI * 2);
+        ctx.arc(width * 0.08, -height * 0.72, 8, 0, Math.PI * 2);
+        ctx.arc(width * 0.25, -height * 0.72, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ff0000';
+        ctx.beginPath();
+        ctx.arc(width * 0.1, -height * 0.71, 4, 0, Math.PI * 2);
+        ctx.arc(width * 0.27, -height * 0.71, 4, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 口
+        ctx.fillStyle = '#8B0000';
+        ctx.beginPath();
+        ctx.ellipse(width * 0.3, -height * 0.58, 15, 8, 0.2, 0, Math.PI);
+        ctx.fill();
+        
+        // 足
+        ctx.fillStyle = '#90EE90';
+        const walkOffset = Math.sin(frame * 0.15) * 8;
+        ctx.beginPath();
+        ctx.ellipse(-width * 0.25 + walkOffset, -15, 18, 15, 0, 0, Math.PI * 2);
+        ctx.ellipse(width * 0.2 - walkOffset, -15, 18, 15, 0, 0, Math.PI * 2);
         ctx.fill();
         
         // 爪
-        ctx.fillStyle = '#4a4a4a';
-        for (let i = 0; i < 3; i++) {
-            ctx.beginPath();
-            ctx.ellipse(-width * 0.04 + i * width * 0.04, height * 0.15, width * 0.03, height * 0.08, 0, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.restore();
-        
-        // 右腕
-        ctx.save();
-        ctx.translate(width * 0.35, -height * 0.1);
-        ctx.rotate(armAngle);
-        ctx.fillStyle = skinColor;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, width * 0.08, height * 0.2, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 爪
-        ctx.fillStyle = '#4a4a4a';
-        for (let i = 0; i < 3; i++) {
-            ctx.beginPath();
-            ctx.ellipse(-width * 0.04 + i * width * 0.04, height * 0.15, width * 0.03, height * 0.08, 0, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.restore();
-        
-        // ========== 足 ==========
-        ctx.fillStyle = skinColor;
-        ctx.beginPath();
-        ctx.ellipse(-width * 0.2, height * 0.15, width * 0.1, height * 0.15, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = '#4a4a4a';
-        ctx.beginPath();
-        ctx.ellipse(-width * 0.2, height * 0.25, width * 0.12, height * 0.08, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = skinColor;
-        ctx.beginPath();
-        ctx.ellipse(width * 0.2, height * 0.15, width * 0.1, height * 0.15, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = '#4a4a4a';
-        ctx.beginPath();
-        ctx.ellipse(width * 0.2, height * 0.25, width * 0.12, height * 0.08, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // ========== 尾 ==========
-        const tailSwing = Math.sin(frame * 0.15) * 0.3;
-        ctx.save();
-        ctx.translate(width * 0.3, -height * 0.15);
-        ctx.rotate(tailSwing);
-        
-        ctx.fillStyle = shellColor;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, width * 0.12, height * 0.25, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 尾のパターン
-        ctx.strokeStyle = shellHighlight;
-        ctx.lineWidth = 1.5;
-        for (let i = 0; i < 2; i++) {
-            ctx.beginPath();
-            ctx.arc(0, -height * 0.08 + i * height * 0.12, width * 0.08, 0, Math.PI * 2);
-            ctx.stroke();
+        ctx.fillStyle = '#F0E68C';
+        for (let foot = -1; foot <= 1; foot += 2) {
+            const fx = foot < 0 ? -width * 0.25 + walkOffset : width * 0.2 - walkOffset;
+            for (let c = 0; c < 3; c++) {
+                ctx.beginPath();
+                ctx.moveTo(fx - 10 + c * 10, -8);
+                ctx.lineTo(fx - 12 + c * 10, 5);
+                ctx.lineTo(fx - 5 + c * 10, -8);
+                ctx.fill();
+            }
         }
         
-        ctx.restore();
-        
-        // ========== 炎エフェクト（口から） ==========
-        if (frame % 20 < 10) {
-            ctx.fillStyle = 'rgba(255, 100, 0, 0.6)';
-            ctx.beginPath();
-            ctx.ellipse(0, -height * 0.32, width * 0.12, height * 0.08, 0, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = 'rgba(255, 200, 0, 0.4)';
-            ctx.beginPath();
-            ctx.ellipse(0, -height * 0.3, width * 0.08, height * 0.06, 0, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        
-        ctx.restore();
         ctx.restore();
     }
 
