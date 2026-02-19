@@ -2384,13 +2384,74 @@ class Game {
         // 動画を最初から再生
         endingVideo.currentTime = 0;
         
-        // 動画の再生を試みる
-        const playPromise = endingVideo.play();
+        // 動画のロード状態を監視
+        let videoStarted = false;
+        let timeoutId = null;
         
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                console.log('Video play error:', error);
-            });
+        // 動画が再生可能になったら再生開始
+        const onCanPlay = () => {
+            console.log('Video can play - starting playback');
+            if (!videoStarted) {
+                videoStarted = true;
+                const playPromise = endingVideo.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log('Video play error:', error);
+                        showCongratulations();
+                    });
+                }
+            }
+        };
+        
+        // 動画ロード失敗時
+        const onError = () => {
+            console.log('Video load error');
+            showCongratulations();
+        };
+        
+        // Congratulations画面を表示する関数
+        const showCongratulations = () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            videoContainer.style.display = 'none';
+            gameContainer.style.display = 'block';
+            sound.victory();
+            titleText.innerHTML = 'CONGRATULATIONS!';
+            descText.innerHTML = `You saved the Princess!<br>Score: ${this.score}<br>Coins: ${this.coins}`;
+            startBtn.innerText = '★ PLAY AGAIN ★';
+            overlay.classList.remove('hidden');
+            bossHealthContainer.classList.remove('visible');
+            this.lives = 3;
+            this.score = 0;
+            this.coins = 0;
+            this.level = 0;
+            
+            // イベントリスナーを削除
+            endingVideo.removeEventListener('canplay', onCanPlay);
+            endingVideo.removeEventListener('ended', onEnded);
+            endingVideo.removeEventListener('error', onError);
+        };
+        
+        // 動画終了後にCongratulations画面を表示
+        const onEnded = () => {
+            console.log('Video ended - showing congratulations');
+            showCongratulations();
+        };
+        
+        // イベントリスナーを追加
+        endingVideo.addEventListener('canplay', onCanPlay);
+        endingVideo.addEventListener('ended', onEnded);
+        endingVideo.addEventListener('error', onError);
+        
+        // 動画のロードを開始
+        endingVideo.load();
+        
+        // タイムアウト: 動画が再生されない場合は60秒後にCongratulations画面を表示
+        timeoutId = setTimeout(() => {
+            console.log('Video timeout - showing congratulations screen');
+            showCongratulations();
+        }, 60000);
+    }
+);
         }
         
         // 動画終了後にCongratulations画面を表示
