@@ -2451,45 +2451,6 @@ class Game {
             showCongratulations();
         }, 60000);
     }
-);
-        }
-        
-        // 動画終了後にCongratulations画面を表示
-        endingVideo.onended = () => {
-            console.log('Video ended - showing congratulations');
-            videoContainer.style.display = 'none';
-            gameContainer.style.display = 'block';
-            sound.victory();
-            titleText.innerHTML = 'CONGRATULATIONS!';
-            descText.innerHTML = `You saved the Princess!<br>Score: ${this.score}<br>Coins: ${this.coins}`;
-            startBtn.innerText = '★ PLAY AGAIN ★';
-            overlay.classList.remove('hidden');
-            bossHealthContainer.classList.remove('visible');
-            this.lives = 3;
-            this.score = 0;
-            this.coins = 0;
-            this.level = 0;
-        };
-        
-        // タイムアウト: 動画が再生されない場合は30秒後にCongratulations画面を表示
-        setTimeout(() => {
-            if (!endingVideo.ended && videoContainer.style.display !== 'none') {
-                console.log('Video timeout - showing congratulations screen');
-                videoContainer.style.display = 'none';
-                gameContainer.style.display = 'block';
-                sound.victory();
-                titleText.innerHTML = 'CONGRATULATIONS!';
-                descText.innerHTML = `You saved the Princess!<br>Score: ${this.score}<br>Coins: ${this.coins}`;
-                startBtn.innerText = '★ PLAY AGAIN ★';
-                overlay.classList.remove('hidden');
-                bossHealthContainer.classList.remove('visible');
-                this.lives = 3;
-                this.score = 0;
-                this.coins = 0;
-                this.level = 0;
-            }
-        }, 30000);
-    }
 
     update() {
         if (!this.isRunning || this.showingLevelIndicator || this.levelTransitioning) return;
@@ -2951,7 +2912,7 @@ console.log('Super Mario Adventure - Fully Loaded!');
     <!-- エンディング動画プレイヤー -->
     <div id="video-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 50; display: none; align-items: center; justify-content: center;">
         <video id="ending-video" style="width: 100%; height: 100%; object-fit: contain;" playsinline preload="auto" crossorigin="anonymous">
-            <source src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663028639017/UQuRZEOtJZkNsauh.mp4" type="video/mp4">
+            <source src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663028639017/HbqxVIGHIgmiiwNQ.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
     </div>
